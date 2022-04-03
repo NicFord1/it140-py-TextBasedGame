@@ -1,3 +1,4 @@
+```
 setup the game characters (names)
 setup the game map (dictionary of rooms each with a dictionary of {directional movements and the connected room} as well as an item found in the room)
     map format is [room]: {[direction: room][1..4], [item: 'item name']}[8..n]
@@ -18,3 +19,4 @@ until the user wins, losses or quits the game
 
     until the user enters a valid command (i.e., go North, go East, etc)
         ask the user what their next move is
+```
