@@ -20,5 +20,13 @@ PROGRAM TextBasedGame:
 
         WHILE we don't have a valid command (i.e., go North, go East, etc)
             ask the user what their next move is
+
+            MATCH command issued
+                CASE go North, move to room connected to the North
+                CASE go East, move to room connected to the  East
+                CASE go South, move to room connected to the  South
+                CASE go West, move to room connected to the  West
+                CASE get 'item name', move item to collected items
+                CASE DEFAULT SHOW error message
 END
 ```
