@@ -23,10 +23,6 @@ GAME_MAP = { # a dictionary linking a room to other rooms
     "Courtyard": {"North": "Sunroom", "Item": VILLAIN}
 }
 
-availableItems = [] # create list for available items
-collectedItems = [] # create list for collected items
-curRoom = "" # create string to keep track of current room
-
 # provide player with the story of the game
 def showStory():
     print("                  ", VILLAIN, "Text Adventure Game\n")
@@ -48,89 +44,80 @@ def showInstructions():
     print("************************************************************************")
 
 # provide player with current status of game play
-def showStatus():
-    global curRoom, collectedItems, availableItems
+def showStatus(room, collectedInventory, availableInventory):
     # print the player's current status, collected items & item in room, if there is one
     print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("You are currently in the", curRoom)
-    print("Collected Items:", collectedItems)
-    print("Available Items:", availableItems)
-    if(getItem(curRoom) is not False):
-        print("You see a", getItem(curRoom))
+    print("You are currently in the", room)
+    print("Collected Items:", collectedInventory)
+    if(getItem(room, availableInventory) is not False):
+        print("You see a", getItem(room, availableInventory))
     print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 # show the item in specified room
-def getItem(room):
-    global availableItems
-    if("Item" in GAME_MAP[room].keys() and (GAME_MAP[room]["Item"] in availableItems or GAME_MAP[room]["Item"] is VILLAIN)):
+def getItem(room, availableInventory):
+    if(room in GAME_MAP.keys() and "Item" in GAME_MAP[room].keys() and (GAME_MAP[room]["Item"] in availableInventory or GAME_MAP[room]["Item"] is VILLAIN)):
         return GAME_MAP[room]["Item"]
     else:
         return False
 
 # move thru the room exit to the direction specified
-def moveTo(direction):
-    global curRoom
-
-    if(direction in GAME_MAP[curRoom].keys()):
-        curRoom = GAME_MAP[curRoom][direction]
-        return True
+def moveTo(room, direction):
+    if(room in GAME_MAP.keys() and direction in GAME_MAP[room].keys()):
+        return GAME_MAP[room][direction]
     else:
-        print(direction, "is an invalid directional movement for", curRoom)
-        return False
+        print(direction, "is an invalid directional movement for", room)
+        return room
 
 # add an item to the inventory, if it's found in the current room and not already retrieved
 # remove item from available items if successful
-def addToInventory(item, inventory):
-    global curRoom, availableItems
-
+def collectItem(room, item, collectedInventory, availableInventory):
     # check that item belongs to this room and is available
-    if("Item" in GAME_MAP[curRoom] and GAME_MAP[curRoom]["Item"] == item and item in availableItems):
-        inventory.append(item)
-        availableItems.remove(item)
+    if("Item" in GAME_MAP[room] and GAME_MAP[room]["Item"] == item and item in availableInventory):
+        collectedInventory.append(item)
+        availableInventory.remove(item)
         print(item, "retrieved!")
         return True
     else:
-        print(item, "not found in", curRoom)
+        print(item, "not found in", room)
         return False
 
 # reset game play to starting status (Atrium, all items available, no items collected)
-def reset():
-    global availableItems, collectedItems, curRoom
-
-    availableItems.clear()
+def reset(availableInventory, collectedInventory):
+    availableInventory.clear()
     for room in GAME_MAP:
         if("Item" in GAME_MAP[room].keys() and GAME_MAP[room]["Item"] is not VILLAIN):
-            availableItems.append(GAME_MAP[room]["Item"])
+            availableInventory.append(GAME_MAP[room]["Item"])
 
-    collectedItems.clear()
-    curRoom = "Atrium"
+    collectedInventory.clear()
+    return "Atrium"
 
 # allow user to quit the game
 def quit():
     print("Thanks for playing!")
-    input("Press any key to close")
+    input("Press <enter> to close")
     exit()
 
 def main():
-    global availableItems, collectedItems, curRoom
+    availableItems = [] # create list for available items
+    collectedItems = [] # create list for collected items
+    curRoom = reset(availableItems, collectedItems)
 
-    reset()
     showStory()
     showInstructions()
 
     while True:
-        showStatus()
+        showStatus(curRoom, collectedItems, availableItems)
 
         # determine if game is won
-        if(not availableItems and getItem(curRoom) is VILLAIN):
+        if(not availableItems and getItem(curRoom, availableItems) is VILLAIN):
             print("You see the", VILLAIN, "& slay it by collecting all of the available items required!")
             break
         # determine if game is lost, or collect room item
-        elif(getItem(curRoom) is VILLAIN):
+        elif(getItem(curRoom, availableItems) is VILLAIN):
             print("OH NO! You've encountered the", VILLAIN, "before collecting all items. You died X(")
 
             if input("Would you like to play again? (Y/N) ") in ('Y', 'y', 'Yes', 'yes', 'YES'):
-                reset()
+                curRoom = reset(availableItems, collectedItems)
                 continue
             else:
                 quit()
@@ -139,15 +126,15 @@ def main():
         while True:
             # perform next move
             match input("What's your next move? ").split():
-                case ["go", "North"]: moveTo("North")
-                case ["go", "East"]: moveTo("East")
-                case ["go", "South"]: moveTo("South")
-                case ["go", "West"]: moveTo("West")
-                case ["get", *object]: addToInventory(' '.join(object), collectedItems)
+                case ["go", "North"]: curRoom = moveTo(curRoom, "North")
+                case ["go", "East"]: curRoom = moveTo(curRoom, "East")
+                case ["go", "South"]: curRoom = moveTo(curRoom, "South")
+                case ["go", "West"]: curRoom = moveTo(curRoom, "West")
+                case ["get", *object]: collectItem(curRoom, ' '.join(object), collectedItems, availableItems)
                 case ["help"]: showInstructions()
                 case ["story"]: showStory()
                 case ["restart"]:
-                    reset()
+                    curRoom = reset(availableItems, collectedItems)
                     break
                 case ["quit"]: quit()
                 case _:
