@@ -1,3 +1,13 @@
+#ANSI escape sequence constants for formating text
+class Format:
+    HEADER = '\033[95;1m'
+    STATUS = '\033[94m'
+    COMMAND = '\033[96m'
+    INPUT = '\033[92m'
+    WARNING = '\033[93;3m'
+    FAIL = '\033[91;3m'
+    RESET = '\033[0m'
+
 # game characters
 HERO = "Incredible Geo"
 VILLAIN = "Dangerous Monarch"
@@ -23,53 +33,56 @@ GAME_MAP = { # a dictionary linking a room to other rooms
     "Courtyard": {"North": "Sunroom", "Item": VILLAIN}
 }
 
-# provide player with the story of the game
-def showStory():
+def showStory(): # provide player with the story of the game
     print("                  ", VILLAIN, "Text Adventure Game\n")
-    print("------------------------------------------------------------------------")
+    print(Format.HEADER + "------------------------------------------------------------------------" + Format.RESET)
     print("You're the", HERO, "visiting the", VILLAIN, "\b's castle. The")
     print(VILLAIN, "is creating havoc in the castle and the", HERO)
     print("must prevent the", VILLAIN, "from creating too much havoc upon the")
     print("castle and it's visitors.")
-    print("------------------------------------------------------------------------")
+    print(Format.HEADER + "------------------------------------------------------------------------" + Format.RESET)
 
-# provide player with instructions on how to play
-def showInstructions():
-    print("************************************************************************")
-    print("Collect all items to win the game or be defeated by the", VILLAIN, "\b!")
-    print("Move commands: go North, go East, go South, go West")
-    print("Add to Inventory: get 'item name'")
-    print("Show the Story or Instructions: story, help")
-    print("Quit playing: quit")
-    print("************************************************************************")
+def showInstructions(): # provide player with instructions on how to play
+    print(Format.HEADER + "************************************************************************" + Format.RESET)
+    print("Collect all items to win the game or be defeated by the", VILLAIN + "!")
+    print("Move commands:", Format.COMMAND + "go North, go East, go South, go West" + Format.RESET)
+    print("Add to Inventory:", Format.COMMAND + "get 'item name'" + Format.RESET)
+    print("Show the Story or Instructions:", Format.COMMAND + "story, help" + Format.RESET)
+    print("Quit playing:", Format.COMMAND + "quit" + Format.RESET)
+    print(Format.HEADER + "************************************************************************" + Format.RESET)
 
-# provide player with current status of game play
+# provide player with current status (current room, collected items & item in room, if there is one) of game play
 def showStatus(room, collectedInventory, availableInventory):
-    # print the player's current status, collected items & item in room, if there is one
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("You are currently in the", room)
-    print("Collected Items:", collectedInventory)
-    if(getItem(room, availableInventory) is not False):
-        print("You see a", getItem(room, availableInventory))
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    item = getItem(room, availableInventory)
 
-# show the item in specified room
-def getItem(room, availableInventory):
+    print(Format.HEADER + "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" + Format.RESET)
+    print("You are currently in the", Format.STATUS + room + Format.RESET)
+    print("Collected Items:" + Format.STATUS, collectedInventory, Format.RESET)
+
+    if(item is not None and item is not VILLAIN):
+        print("You see a", Format.STATUS + item + Format.RESET)
+    elif(item is VILLAIN):
+        print("You see the", Format.STATUS + item + Format.RESET, "and", Format.WARNING + "prepare for battle!" + Format.RESET)
+
+    print(Format.HEADER + "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" + Format.RESET)
+
+def getItem(room, availableInventory): # return the item in specified room
     if(room in GAME_MAP.keys() and "Item" in GAME_MAP[room].keys() and (GAME_MAP[room]["Item"] in availableInventory or GAME_MAP[room]["Item"] is VILLAIN)):
         return GAME_MAP[room]["Item"]
     else:
-        return False
+        return None
 
-# move thru the room exit to the direction specified
+# return the room the player is in after moving thru the exit to the direction specified
 def moveTo(room, direction):
     if(room in GAME_MAP.keys() and direction in GAME_MAP[room].keys()):
         return GAME_MAP[room][direction]
     else:
-        print(direction, "is an invalid directional movement for", room)
+        print(Format.FAIL + direction, "is an invalid directional movement for", room + Format.RESET)
         return room
 
 # add an item to the inventory, if it's found in the current room and not already retrieved
 # remove item from available items if successful
+# return the success state of collecting the item
 def collectItem(room, item, collectedInventory, availableInventory):
     # check that item belongs to this room and is available
     if("Item" in GAME_MAP[room] and GAME_MAP[room]["Item"] == item and item in availableInventory):
@@ -78,10 +91,11 @@ def collectItem(room, item, collectedInventory, availableInventory):
         print(item, "retrieved!")
         return True
     else:
-        print(item, "not found in", room)
+        print(Format.WARNING + item, "not found in", room + Format.RESET)
         return False
 
 # reset game play to starting status (Atrium, all items available, no items collected)
+# return spawn point
 def reset(availableInventory, collectedInventory):
     availableInventory.clear()
     for room in GAME_MAP:
@@ -91,10 +105,10 @@ def reset(availableInventory, collectedInventory):
     collectedInventory.clear()
     return "Atrium"
 
-# allow user to quit the game
-def quit():
-    print("Thanks for playing!")
-    input("Press <enter> to close")
+def quit(): # allow user to quit the game
+    print(Format.RESET)
+    print("\n                      Thanks for playing!")
+    input("                    Press <" + Format.COMMAND + "enter" + Format.RESET + "> to close")
     exit()
 
 def main():
@@ -106,42 +120,42 @@ def main():
     showInstructions()
 
     while True:
+        seekNextCommand = True
         showStatus(curRoom, collectedItems, availableItems)
 
         # determine if game is won
         if(not availableItems and getItem(curRoom, availableItems) is VILLAIN):
             print("You see the", VILLAIN, "& slay it by collecting all of the available items required!")
-            break
+            quit()
         # determine if game is lost, or collect room item
         elif(getItem(curRoom, availableItems) is VILLAIN):
-            print("OH NO! You've encountered the", VILLAIN, "before collecting all items. You died X(")
+            print(Format.FAIL + "OH NO! You've encountered the", VILLAIN, "before collecting all items. You died X(" + Format.RESET)
 
-            if input("Would you like to play again? (Y/N) ") in ('Y', 'y', 'Yes', 'yes', 'YES'):
+            if input("Would you like to play again? (" + Format.COMMAND + "Y/N" + Format.RESET + ") " + Format.INPUT) in ('Y', 'y', 'Yes', 'yes', 'YES'):
                 curRoom = reset(availableItems, collectedItems)
                 continue
-            else:
-                quit()
+            else: quit()
 
-        # get the player's next 'move'
-        while True:
-            # perform next move
-            match input("What's your next move? ").split():
-                case ["go", "North"]: curRoom = moveTo(curRoom, "North")
-                case ["go", "East"]: curRoom = moveTo(curRoom, "East")
-                case ["go", "South"]: curRoom = moveTo(curRoom, "South")
-                case ["go", "West"]: curRoom = moveTo(curRoom, "West")
-                case ["get", *object]: collectItem(curRoom, ' '.join(object), collectedItems, availableItems)
-                case ["help"]: showInstructions()
-                case ["story"]: showStory()
-                case ["restart"]:
-                    curRoom = reset(availableItems, collectedItems)
-                    break
-                case ["quit"]: quit()
-                case _:
-                    print("Invalid move, try again. For a reminder, type 'help'.")
-                    continue
-            break
-    quit()
+        # get the player's next command
+        while seekNextCommand:
+            seekNextCommand = False
+            # perform next command
+            try:
+                match input("What's your next move? " + Format.INPUT).title().split():
+                    case ["Go", "North"]: curRoom = moveTo(curRoom, "North")
+                    case ["Go", "East"]: curRoom = moveTo(curRoom, "East")
+                    case ["Go", "South"]: curRoom = moveTo(curRoom, "South")
+                    case ["Go", "West"]: curRoom = moveTo(curRoom, "West")
+                    case ["Get", *object]: collectItem(curRoom, ' '.join(object), collectedItems, availableItems)
+                    case ["Help"]: showInstructions()
+                    case ["Story"]: showStory()
+                    case ["Restart"]: curRoom = reset(availableItems, collectedItems)
+                    case ["Quit"]: quit()
+                    case _: # invlaid command
+                        print(Format.FAIL + "Invalid move, try again. For a reminder, type '" + Format.COMMAND + "help" + Format.FAIL + "'." + Format.RESET)
+                        seekNextCommand = True
+            except EOFError: seekNextCommand = True
+            except KeyboardInterrupt: quit()
 
 if __name__ == "__main__":
     main()
