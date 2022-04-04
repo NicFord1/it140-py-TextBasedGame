@@ -55,12 +55,12 @@ def showStatus():
     print("You are currently in the", curRoom)
     print("Collected Items:", collectedItems)
     print("Available Items:", availableItems)
-    if(showItem(curRoom) is not False):
-        print("You see a", showItem(curRoom))
+    if(getItem(curRoom) is not False):
+        print("You see a", getItem(curRoom))
     print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 # show the item in specified room
-def showItem(room):
+def getItem(room):
     global availableItems
     if("Item" in GAME_MAP[room].keys() and (GAME_MAP[room]["Item"] in availableItems or GAME_MAP[room]["Item"] is VILLAIN)):
         return GAME_MAP[room]["Item"]
@@ -122,11 +122,11 @@ def main():
         showStatus()
 
         # determine if game is won
-        if(not availableItems and showItem(curRoom) is VILLAIN):
+        if(not availableItems and getItem(curRoom) is VILLAIN):
             print("You see the", VILLAIN, "& slay it by collecting all of the available items required!")
             break
         # determine if game is lost, or collect room item
-        elif(showItem(curRoom) is VILLAIN):
+        elif(getItem(curRoom) is VILLAIN):
             print("OH NO! You've encountered the", VILLAIN, "before collecting all items. You died X(")
 
             if input("Would you like to play again? (Y/N) ") in ('Y', 'y', 'Yes', 'yes', 'YES'):
