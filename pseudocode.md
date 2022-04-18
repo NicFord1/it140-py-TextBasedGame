@@ -4,10 +4,6 @@ PROGRAM TextBasedGame:
     SET the game map
         map format is [room]: {[direction: room][1..4], [item: 'item name']}[8..n]
 
-    SET the available items to be empty
-    SET the collected items to be empty
-    SET the current room to be the start room
-
     FUNCTION showStory
         Pass In: nothing
         SHOW game story to user
@@ -73,6 +69,10 @@ PROGRAM TextBasedGame:
 
     FUNCTION main
         Pass In: nothing
+
+        SET the available items to be empty
+        SET the collected items to be empty
+        SET the current room to be the start room
     
         SHOW the user a welcome message, including the game story and instructions to play the game
 
