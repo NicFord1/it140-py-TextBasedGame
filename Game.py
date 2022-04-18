@@ -49,12 +49,12 @@ GAME_MAP = { # a dictionary linking a room to other rooms
 }
 
 def showStory(): # provide player with the story of the game
-    print("                  ", VILLAIN, "Text Adventure Game\n")
+    Format.printCentered(VILLAIN + " Text Adventure Game\n")
     Format.printHeader("-")
-    print("You're the", HERO, "visiting the", VILLAIN, "\b's castle. The")
-    print(VILLAIN, "is creating havoc in the castle and the", HERO)
-    print("must prevent the", VILLAIN, "from creating too much havoc upon the")
-    print("castle and it's visitors.")
+    print("You're the", HERO, "visiting the", VILLAIN, "\b's castle. The", end = " ")
+    print(VILLAIN, "is creating havoc in the castle and the", HERO, end = " ")
+    print("must prevent the", VILLAIN, "from creating too much havoc upon the", end = " ")
+    print("castle and it's visitors.", end = "\n")
     Format.printHeader("-")
 
 def showInstructions(): # provide player with instructions on how to play
